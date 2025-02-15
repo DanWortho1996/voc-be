@@ -14,7 +14,12 @@ const db = admin.firestore();
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server, { cors: { origin: "*" } });
+const io = new Server(server, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"]
+  }
+});
 
 let rooms = {}; // Store players in rooms
 
@@ -22,8 +27,8 @@ io.on("connection", (socket) => {
   console.log("Player connected:", socket.id);
 
   socket.on("joinGame", ({ name, room }) => {
-    console.log("Received joinGame event:", { name, room }); // Debugging log
-  
+    console.log(`🔹 Received joinGame: Player ${name} joining Room ${room}`);
+    
     if (!room) {
       io.to(socket.id).emit("nextPlayer", { nextPlayer: name, room: null });
       return;
@@ -35,17 +40,12 @@ io.on("connection", (socket) => {
     
     if (!rooms[room].includes(name)) {
       rooms[room].push(name);
-      socket.join(room); // Ensure player is inside the room
+      socket.join(room);
     }
-  
-    console.log(`Player ${name} joined room ${room}. Current players:`, rooms[room]);
-  
+    
+    console.log(`✅ Player ${name} joined Room ${room}. Current Players:`, rooms[room]);
     io.to(room).emit("playersInRoom", rooms[room]);
-  
-    if (rooms[room].length === 1) {
-      io.to(room).emit("nextPlayer", { nextPlayer: rooms[room][0], room });
-    }
-  });  
+  });
 
   socket.on("playerLost", ({ name, room }) => {
     console.log(`${name} was eliminated from room ${room || "single-player"}.`);
@@ -82,7 +82,7 @@ io.on("connection", (socket) => {
         delete rooms[room]; // Clean up empty rooms
       }
     }
-  });  
+  });
 });
 
 server.listen(5000, () => console.log("Server running on port 5000"));
