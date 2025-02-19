@@ -12,7 +12,7 @@ admin.initializeApp({
 });
 const db = admin.firestore();
 
-const app = express(); // ✅ Defined before using it
+const app = express(); // Defined before using it
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
@@ -23,7 +23,7 @@ const io = new Server(server, {
   }
 });
 
-// ✅ Root route added correctly
+// Root route added correctly
 app.get("/", (req, res) => {
   res.send("Voting game server is running");
 });
@@ -34,7 +34,7 @@ io.on("connection", (socket) => {
   console.log("Player connected:", socket.id);
 
   socket.on("joinGame", ({ name, room }) => {
-    console.log(`🔹 Received joinGame: Player ${name} joining Room ${room}`);
+    console.log(`Received joinGame: Player ${name} joining Room ${room}`);
     
     if (!room) {
       io.to(socket.id).emit("nextPlayer", { nextPlayer: name, room: null });
