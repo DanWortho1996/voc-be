@@ -82,17 +82,22 @@ io.on("connection", (socket) => {
     console.log(`${name} lost in room ${room}. Removing player...`);
     
     if (room && rooms[room]) {
+      // Remove the player from the room
       rooms[room] = rooms[room].filter(player => player !== name);
+  
+      // Notify all players in the room
       io.to(room).emit("playerEliminated", { eliminatedPlayer: name, room });
-      
+  
       if (rooms[room].length > 0) {
+        console.log(`➡️ Next player: ${rooms[room][0]}`);
         io.to(room).emit("nextPlayer", { nextPlayer: rooms[room][0], room });
       } else {
+        console.log(`🛑 Game Over! No players left in room ${room}`);
         io.to(room).emit("gameOver");
-        delete rooms[room];
+        delete rooms[room]; // Clean up empty rooms
       }
     }
-  });  
+  });
 
   socket.on("updateScore", async ({ name, score }) => {
     try {
