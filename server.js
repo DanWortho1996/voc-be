@@ -34,7 +34,7 @@ io.on("connection", (socket) => {
   console.log("Player connected:", socket.id);
 
   socket.on("joinGame", ({ name, room }) => {
-    console.log(`Received joinGame: Player ${name} joining Room ${room}`);
+    console.log(`🔹 Received joinGame: Player ${name} joining Room ${room}`);
     
     if (!room) {
       io.to(socket.id).emit("nextPlayer", { nextPlayer: name, room: null });
@@ -49,16 +49,19 @@ io.on("connection", (socket) => {
       rooms[room].push(name);
       socket.join(room);
     }
-    
+  
     console.log(`Player ${name} joined Room ${room}. Current Players:`, rooms[room]);
     io.to(room).emit("playersInRoom", rooms[room]);
-
-    // Start game if the first player joins
+  
+    // Send confirmation
+    io.to(socket.id).emit("joinSuccess", { name, room });
+  
     if (rooms[room].length === 1) {
       console.log(`🚀 Game starting! First player: ${rooms[room][0]}`);
       io.to(room).emit("nextPlayer", { nextPlayer: rooms[room][0], room });
     }
   });
+  
 
   socket.on("playerLost", ({ name, room, correctAnswer }) => {
     console.log(`${name} was eliminated from room ${room || "single-player"}.`);
