@@ -6,13 +6,13 @@ const admin = require("firebase-admin");
 const path = require("path");
 
 // Initialize Firebase Admin SDK
-const serviceAccount = require(path.join(__dirname, "firebase-service-account.json")); // Ensure the correct path
+const serviceAccount = require(path.join(__dirname, "firebase-service-account.json")); // Ensure correct path
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
 });
 const db = admin.firestore();
 
-const app = express();
+const app = express(); // ✅ Defined before using it
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
@@ -21,6 +21,11 @@ const io = new Server(server, {
     allowedHeaders: ["Content-Type"],
     credentials: true
   }
+});
+
+// ✅ Root route added correctly
+app.get("/", (req, res) => {
+  res.send("Voting game server is running");
 });
 
 let rooms = {}; // Store players in rooms
@@ -45,7 +50,7 @@ io.on("connection", (socket) => {
       socket.join(room);
     }
     
-    console.log(`✅ Player ${name} joined Room ${room}. Current Players:`, rooms[room]);
+    console.log(`Player ${name} joined Room ${room}. Current Players:`, rooms[room]);
     io.to(room).emit("playersInRoom", rooms[room]);
 
     // Start game if the first player joins
@@ -94,4 +99,5 @@ io.on("connection", (socket) => {
   });
 });
 
-server.listen(5000, () => console.log("Server running on port 5000"));
+const PORT = process.env.PORT || 5000;
+server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
