@@ -16,8 +16,10 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: "*",
-    methods: ["GET", "POST"]
+    origin: "*", // Change this to your frontend URL for security
+    methods: ["GET", "POST"],
+    allowedHeaders: ["Content-Type"],
+    credentials: true
   }
 });
 
@@ -45,6 +47,12 @@ io.on("connection", (socket) => {
     
     console.log(`✅ Player ${name} joined Room ${room}. Current Players:`, rooms[room]);
     io.to(room).emit("playersInRoom", rooms[room]);
+
+    // Start game if the first player joins
+    if (rooms[room].length === 1) {
+      console.log(`🚀 Game starting! First player: ${rooms[room][0]}`);
+      io.to(room).emit("nextPlayer", { nextPlayer: rooms[room][0], room });
+    }
   });
 
   socket.on("playerLost", ({ name, room }) => {
