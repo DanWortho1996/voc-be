@@ -63,12 +63,28 @@ io.on("connection", (socket) => {
   });
   
 
-  socket.on("playerLost", ({ name, room, correctAnswer }) => {
-    console.log(`${name} was eliminated from room ${room || "single-player"}.`);
+  // socket.on("playerLost", ({ name, room, correctAnswer }) => {
+  //   console.log(`${name} was eliminated from room ${room || "single-player"}.`);
+  //   if (room && rooms[room]) {
+  //     rooms[room] = rooms[room].filter(player => player !== name);
+  //     io.to(room).emit("playerEliminated", { eliminatedPlayer: name, room });
+  //     io.to(room).emit("revealAnswer", { correctAnswer, room });
+  //     if (rooms[room].length > 0) {
+  //       io.to(room).emit("nextPlayer", { nextPlayer: rooms[room][0], room });
+  //     } else {
+  //       io.to(room).emit("gameOver");
+  //       delete rooms[room];
+  //     }
+  //   }
+  // });
+
+  socket.on("playerLost", ({ name, room }) => {
+    console.log(`${name} lost in room ${room}. Removing player...`);
+    
     if (room && rooms[room]) {
       rooms[room] = rooms[room].filter(player => player !== name);
       io.to(room).emit("playerEliminated", { eliminatedPlayer: name, room });
-      io.to(room).emit("revealAnswer", { correctAnswer, room });
+      
       if (rooms[room].length > 0) {
         io.to(room).emit("nextPlayer", { nextPlayer: rooms[room][0], room });
       } else {
@@ -76,7 +92,7 @@ io.on("connection", (socket) => {
         delete rooms[room];
       }
     }
-  });
+  });  
 
   socket.on("updateScore", async ({ name, score }) => {
     try {
